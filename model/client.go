@@ -9,22 +9,36 @@ import (
 
 type Client struct {
 	Conn *websocket.Conn
-	Send chan Message
+	Send chan *Message
 	Name string
 }
 
 func (c *Client) Read() {
-	m := Message{}
+	defer func() {
+		c.Conn.Close()
+	}()
+	m := &Message{}
 	for {
 		err := c.Conn.ReadJSON(&m)
 		if err != nil {
 			log.Println("Error ReadJSON()")
 			break
 		}
-		switch m.Payload.Command{
-		case "onhand":
-			fmt.Println("Read Onhand Message...")
-		case "cancel":
+		switch c.Name {
+		case "web":
+			switch m.Payload.Command {
+			case "onhand":
+				H.Onhand(c)
+			case "cancel":
+				H.Cancel(c)
+			}
+		case "dev":
+			switch m.Device {
+			case "coin_hopper":
+			case "coin_acc":
+			case "bill_acc":
+			case "printer":
+			}
 		}
 	}
 }

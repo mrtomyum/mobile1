@@ -6,23 +6,31 @@ import (
 	"net/http"
 	"github.com/gorilla/websocket"
 	"github.com/mrtomyum/mobile1/model"
+	"fmt"
+	"log"
 )
 
 var (
 	upgrader = websocket.Upgrader{
 		ReadBufferSize: 1024,
 		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
 	}
 )
 
 func main() {
+	h := model.Host{}
+	go h.Run()
 	r := gin.Default()
 	app := router(r)
-	app.RunTLS(
-		":8088",
-		"api.nava.work.crt",
-		"nava.work.key",
-	)
+	app.Run(":8088")
+	//app.RunTLS(
+	//	":8088",
+	//	"api.nava.work.crt",
+	//	"nava.work.key",
+	//)
 }
 
 func router(r *gin.Engine) *gin.Engine{
@@ -30,24 +38,39 @@ func router(r *gin.Engine) *gin.Engine{
 	//r.Static("/", "./view/html")
 	r.Use(static.Serve("/", static.LocalFile("view", true)))
 	r.GET("/ws", func(c *gin.Context){
-		wsServ(c.Writer, c.Request)
+		Server(c.Writer, c.Request)
 	})
 	return r
 }
 
-func wsServ(w http.ResponseWriter, r *http.Request) {
+func Server(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("start Server...")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		http.NotFound(w, r)
+		fmt.Println(err)
+		//http.NotFound(w, r)
 		return
 	}
 	defer conn.Close()
-	clientName := r.Header.Get("Name")
-	c := model.Client{
+
+	fmt.Println("start New Client instance...")
+	clientName := r.Header.Get("Name") // "web" or "dev"
+	c := &model.Client{
 		Conn: conn,
-		Send: make(chan model.Message),
+		Send: make(chan *model.Message),
 		Name: clientName,
 	}
-	go c.Read()
+	switch c.Name {
+	case "web":
+		log.Println("WebClient:", c.Name)
+		model.H.WebClient <- c
+	case "dev":
+		log.Println("DevClient:", c.Name)
+		model.H.DevClient <- c
+	default:
+		log.Println("Default: No Name Provide")
+
+	}
 	go c.Write()
+	c.Read()
 }
