@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"fmt"
 	"log"
+	"time"
 )
 
 type Client struct {
@@ -22,7 +23,6 @@ func (c *Client) Read() {
 		err := c.Conn.ReadJSON(&m)
 		if err != nil {
 			log.Println("Error ReadJSON()")
-			break
 		}
 		switch c.Name {
 		case "web":
@@ -39,6 +39,10 @@ func (c *Client) Read() {
 			case "bill_acc":
 			case "printer":
 			}
+			return
+		default:
+			fmt.Println("Message:", m)
+			time.Sleep(200 * time.Millisecond)
 		}
 	}
 }
