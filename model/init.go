@@ -9,16 +9,18 @@ var (
 
 func init() {
 	H = Host{
-		Id:          "001",
-		Online:      true,
-		TotalEscrow: 0,
-		BillEscrow:  0,
-		BillBox:     0,
-		CoinBox:     0,
-		SendToWeb:   make(chan *Message),
-		SendToDev:   make(chan *Message),
-		WebOnline:   false,
-		DevOnline:   false,
+		Id:            "001",
+		Online:        true,
+		TotalEscrow:   0,
+		BillEscrow:    0,
+		BillBox:       0,
+		CoinHopperBox: 0,
+		CoinBox:       0,
+		TotalCash:     0,
+		SetWebClient:  make(chan *Client),
+		SetDevClient:  make(chan *Client),
+		CheckOnhand:   make(chan *Client),
+		CancelOrder:   make(chan *Client),
 	}
 	B = BillAcceptor{
 		status: "ok",

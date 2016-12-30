@@ -1,18 +1,18 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"fmt"
 	"github.com/gin-gonic/contrib/static"
-	"net/http"
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/mrtomyum/mobile1/model"
-	"fmt"
+	"net/http"
 	//"log"
 )
 
 var (
 	upgrader = websocket.Upgrader{
-		ReadBufferSize: 1024,
+		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
 			return true
@@ -21,7 +21,6 @@ var (
 )
 
 func main() {
-	//h := model.Host{}
 	go model.H.Run()
 	r := gin.Default()
 	app := router(r)
@@ -33,7 +32,7 @@ func main() {
 	//)
 }
 
-func router(r *gin.Engine) *gin.Engine{
+func router(r *gin.Engine) *gin.Engine {
 	//r.LoadHTMLGlob("view/**/*.html")
 	//r.Static("/", "./view/html")
 	r.Use(static.Serve("/", static.LocalFile("view", true)))
@@ -60,8 +59,8 @@ func ServWeb(w http.ResponseWriter, r *http.Request) {
 		Send: make(chan *model.Message),
 		Name: "web",
 	}
-	fmt.Println("WebClient:", c.Name)
-	model.H.WebClient <- c
+	fmt.Println("WebClient:", c.Name, "...start send <-c to model.H.Webclient")
+	model.H.SetWebClient <- c
 	fmt.Println("start go c.Write()")
 	go c.Write()
 	c.Read()
@@ -76,14 +75,13 @@ func ServDev(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 	fmt.Println("start New Device connection success...")
-	//clientName := r.Header.Get("Name") // "web" or "dev"
 	c := &model.Client{
 		Conn: conn,
 		Send: make(chan *model.Message),
 		Name: "dev",
 	}
 	fmt.Println("DevClient:", c.Name)
-	model.H.DevClient <- c
+	model.H.SetDevClient <- c
 	go c.Write()
 	c.Read()
 }

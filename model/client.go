@@ -1,9 +1,9 @@
 package model
 
 import (
-	"github.com/gorilla/websocket"
-	"github.com/gin-gonic/gin"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"log"
 	//"time"
 )
@@ -12,6 +12,7 @@ type Client struct {
 	Conn *websocket.Conn
 	Send chan *Message
 	Name string
+	Msg  *Message
 }
 
 func (c *Client) Read() {
@@ -25,14 +26,15 @@ func (c *Client) Read() {
 			log.Println("Error ReadJSON():", err)
 			return
 		}
+		c.Msg = m
 		switch c.Name {
 		case "web":
 			fmt.Println("Message from web")
 			switch m.Payload.Command {
 			case "onhand":
-				H.Onhand(c)
+				H.CheckOnhand <- c
 			case "cancel":
-				H.Cancel(c)
+				H.CancelOrder <- c
 			}
 		case "dev":
 			fmt.Println("dev")
@@ -68,4 +70,3 @@ func (c *Client) Write() {
 		}
 	}
 }
-
