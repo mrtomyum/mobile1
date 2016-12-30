@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"log"
-	//"time"
 )
 
 type Client struct {
@@ -30,7 +29,7 @@ func (c *Client) Read() {
 		switch c.Name {
 		case "web":
 			fmt.Println("Message from web")
-			switch m.Payload.Command {
+			switch m.Command {
 			case "onhand":
 				H.CheckOnhand <- c
 			case "cancel":
@@ -47,8 +46,8 @@ func (c *Client) Read() {
 		//return
 		default:
 			fmt.Println("Case default: Message==>", m)
-			m.Payload.Type = "response"
-			m.Payload.Data = "Hello"
+			m.Type = "response"
+			m.Data = "Hello"
 			c.Send <- m
 		}
 	}

@@ -49,9 +49,9 @@ func (h *Host) Run() {
 // Onhand ส่งค่าเงินพัก Escrow ที่ Host เก็บไว้กลับไปให้ web
 func (h *Host) Onhand(c *Client) {
 	fmt.Println("Host.Onhand <-Message...")
-	c.Msg.Payload.Result = true
-	c.Msg.Payload.Type = "response"
-	c.Msg.Payload.Data = h.TotalEscrow
+	c.Msg.Result = true
+	c.Msg.Type = "response"
+	c.Msg.Data = h.TotalEscrow
 	c.Send <- c.Msg
 }
 
@@ -62,21 +62,19 @@ func (h *Host) Cancel(c *Client) error {
 	// Check Bill Acceptor
 	if h.TotalEscrow == 0 { // ไม่มีเงินพัก
 		log.Println("ไม่มีเงินพัก:")
-		c.Msg.Payload.Type = "response"
-		c.Msg.Payload.Result = false
-		c.Msg.Payload.Data = "ไม่มีเงินพัก"
+		c.Msg.Type = "response"
+		c.Msg.Result = false
+		c.Msg.Data = "ไม่มีเงินพัก"
 		c.Send <- c.Msg
 		return errors.New("ไม่มีเงินพัก")
 	}
 	//  สั่งให้ BillAcceptor คืนเงินที่พักไว้
 	m1 := &Message{
-		Device: "bill_acc",
-		Payload: Payload{
-			Command: "escrow",
-			Type:    "request",
-			Result:  true,
-			Data:    false,
-		},
+		Device:  "bill_acc",
+		Command: "escrow",
+		Type:    "request",
+		Result:  true,
+		Data:    false,
 	}
 	h.Dev.Send <- m1
 
@@ -94,12 +92,10 @@ func (h *Host) Cancel(c *Client) error {
 	// CoinHopper
 	// ให้จ่ายเหรียญที่คงค้างตามยอด Escrow ออกด้านหน้า
 	m2 := &Message{
-		Device: "coin_hopper",
-		Payload: Payload{
-			Command: "payout_by_cash",
-			Type:    "request",
-			Data:    coinHopperEscrow,
-		},
+		Device:  "coin_hopper",
+		Command: "payout_by_cash",
+		Type:    "request",
+		Data:    coinHopperEscrow,
 	}
 	h.Dev.Send <- m2
 
@@ -107,17 +103,17 @@ func (h *Host) Cancel(c *Client) error {
 	err = h.Dev.Ws.ReadJSON(&m1)
 	if err != nil {
 		log.Println("Cancel() Coin Hopper error:", err)
-		c.Msg.Payload.Result = false
-		c.Msg.Payload.Type = "response"
-		c.Msg.Payload.Data = "Coin Hopper Error"
+		c.Msg.Result = false
+		c.Msg.Type = "response"
+		c.Msg.Data = "Coin Hopper Error"
 		c.Send <- c.Msg
 	}
 	h.TotalEscrow = 0
 
 	// Send message to Web Client
-	c.Msg.Payload.Type = "response"
-	c.Msg.Payload.Result = true
-	c.Msg.Payload.Data = "sucess"
+	c.Msg.Type = "response"
+	c.Msg.Result = true
+	c.Msg.Data = "sucess"
 	c.Send <- c.Msg
 	return nil
 }
