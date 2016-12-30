@@ -17,6 +17,8 @@ func init() {
 		CoinBox:     0,
 		SendToWeb:   make(chan *Message),
 		SendToDev:   make(chan *Message),
+		WebOnline:   false,
+		DevOnline:   false,
 	}
 	B = BillAcceptor{
 		status: "ok",

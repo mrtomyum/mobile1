@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"fmt"
 	"log"
-	"time"
+	//"time"
 )
 
 type Client struct {
@@ -22,10 +22,12 @@ func (c *Client) Read() {
 	for {
 		err := c.Conn.ReadJSON(&m)
 		if err != nil {
-			log.Println("Error ReadJSON()")
+			log.Println("Error ReadJSON():", err)
+			return
 		}
 		switch c.Name {
 		case "web":
+			fmt.Println("Message from web")
 			switch m.Payload.Command {
 			case "onhand":
 				H.Onhand(c)
@@ -33,16 +35,19 @@ func (c *Client) Read() {
 				H.Cancel(c)
 			}
 		case "dev":
+			fmt.Println("dev")
 			switch m.Device {
 			case "coin_hopper":
 			case "coin_acc":
 			case "bill_acc":
 			case "printer":
 			}
-			return
+		//return
 		default:
-			fmt.Println("Message:", m)
-			time.Sleep(200 * time.Millisecond)
+			fmt.Println("Case default: Message==>", m)
+			m.Payload.Type = "response"
+			m.Payload.Data = "Hello"
+			c.Send <- m
 		}
 	}
 }

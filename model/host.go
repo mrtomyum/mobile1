@@ -31,25 +31,25 @@ func (h *Host) Run() {
 		select {
 		case web = <-h.WebClient:
 			h.WebOnline = true
-			break
+			fmt.Println("Host.Run() case <-h.WebClient, WebOneline = ", h.WebOnline)
+		//return
 		case dev = <-h.DevClient:
 			h.DevOnline = true
-			break
+		//return
 		//case def = <-h.Default:
 		case m := <-h.SendToWeb:
 			web.Send <- m
-			break
+		//break
 		case m := <-h.SendToDev:
 			dev.Send <- m
-			break
+		//break
 		//dev.Conn.WriteJSON(m)
 		}
 	}
 }
 
 func (h *Host) Cancel(web *Client) {
-	// คืนเงินจากทุก Device
-	// โดยตรวจสอบเงิน Escrow ใน Bill Acceptor ด้วยถ้ามีให้คืนเงิน
+	// คืนเงินจากทุก Device โดยตรวจสอบเงิน Escrow ใน Bill Acceptor ด้วยถ้ามีให้คืนเงิน
 	// Check Bill Acceptor
 	if h.TotalEscrow == 0 { // ไม่มีเงินพัก
 		log.Println("ไม่มีเงินพัก:")
@@ -64,7 +64,8 @@ func (h *Host) Cancel(web *Client) {
 			Data:   false,
 		},
 	}
-	h.SendToDev <- m1
+	fmt.Println("setup Message:", m1)
+	//h.SendToDev <- m1
 	go func() { // Todo: ไม่ควรใช้ go func? แล้วจะดัก Channel ยังไง
 		select {
 		case m := <-h.RespFromDev:
