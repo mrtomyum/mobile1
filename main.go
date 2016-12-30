@@ -55,11 +55,11 @@ func ServWeb(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 	fmt.Println("start New Web connection success...")
 	c := &model.Client{
-		Conn: conn,
+		Ws:   conn,
 		Send: make(chan *model.Message),
 		Name: "web",
 	}
-	fmt.Println("WebClient:", c.Name, "...start send <-c to model.H.Webclient")
+	fmt.Println("Web:", c.Name, "...start send <-c to model.H.Webclient")
 	model.H.SetWebClient <- c
 	fmt.Println("start go c.Write()")
 	go c.Write()
@@ -76,11 +76,11 @@ func ServDev(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 	fmt.Println("start New Device connection success...")
 	c := &model.Client{
-		Conn: conn,
+		Ws:   conn,
 		Send: make(chan *model.Message),
 		Name: "dev",
 	}
-	fmt.Println("DevClient:", c.Name)
+	fmt.Println("Dev:", c.Name)
 	model.H.SetDevClient <- c
 	go c.Write()
 	c.Read()

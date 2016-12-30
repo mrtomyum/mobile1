@@ -15,8 +15,8 @@ type Host struct {
 	CoinHopperBox int // มูลค่าเหรียญใน Coin Hopper
 	CoinBox       int // มูลค่าเหรียญใน CoinBox
 	TotalCash     int // รวมมูลค่าเงินในตู้นี้
-	WebClient     *Client
-	DevClient     *Client
+	Web           *Client
+	Dev           *Client
 	SetWebClient  chan *Client
 	SetDevClient  chan *Client
 	CheckOnhand   chan *Client
@@ -28,11 +28,11 @@ func (h *Host) Run() {
 		fmt.Println("Host.Run()...wait for next Channel")
 		select {
 		case c := <-h.SetWebClient:
-			log.Println("<-WebClient:", c)
-			h.WebClient = c
+			log.Println("<-Web:", c)
+			h.Web = c
 		case c := <-h.SetDevClient:
 			log.Println("<-devClient:", c)
-			h.DevClient = c
+			h.Dev = c
 		case c := <-h.CheckOnhand:
 			log.Println("<-CheckOnhand:", c)
 			h.Onhand(c)
@@ -78,10 +78,10 @@ func (h *Host) Cancel(c *Client) error {
 			Data:    false,
 		},
 	}
-	h.DevClient.Send <- m1
+	h.Dev.Send <- m1
 
 	// Todo: Check BillAcc response
-	err := h.DevClient.Conn.ReadJSON(&m1)
+	err := h.Dev.Ws.ReadJSON(&m1)
 	if err != nil {
 		log.Println("Host.Cancel() error 1")
 		return err
@@ -101,12 +101,17 @@ func (h *Host) Cancel(c *Client) error {
 			Data:    coinHopperEscrow,
 		},
 	}
-	h.DevClient.Send <- m2
+	h.Dev.Send <- m2
+
 	// Todo: Check if error from CoinHopper
-	//if err != nil {
-	//	m2.Payload.Result = false
-	//	c.Send <- m2
-	//}
+	err = h.Dev.Ws.ReadJSON(&m1)
+	if err != nil {
+		log.Println("Cancel() Coin Hopper error:", err)
+		c.Msg.Payload.Result = false
+		c.Msg.Payload.Type = "response"
+		c.Msg.Payload.Data = "Coin Hopper Error"
+		c.Send <- c.Msg
+	}
 	h.TotalEscrow = 0
 
 	// Send message to Web Client

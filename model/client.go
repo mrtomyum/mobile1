@@ -9,7 +9,7 @@ import (
 )
 
 type Client struct {
-	Conn *websocket.Conn
+	Ws   *websocket.Conn
 	Send chan *Message
 	Name string
 	Msg  *Message
@@ -17,11 +17,11 @@ type Client struct {
 
 func (c *Client) Read() {
 	defer func() {
-		c.Conn.Close()
+		c.Ws.Close()
 	}()
 	m := &Message{}
 	for {
-		err := c.Conn.ReadJSON(&m)
+		err := c.Ws.ReadJSON(&m)
 		if err != nil {
 			log.Println("Error ReadJSON():", err)
 			return
@@ -56,17 +56,17 @@ func (c *Client) Read() {
 
 func (c *Client) Write() {
 	defer func() {
-		c.Conn.Close()
+		c.Ws.Close()
 	}()
 	for {
 		select {
 		case m, ok := <-c.Send:
 			if !ok {
-				c.Conn.WriteJSON(gin.H{"message": "Cannot send data"})
+				c.Ws.WriteJSON(gin.H{"message": "Cannot send data"})
 				return
 			}
 			fmt.Println("Client.Write():", m)
-			c.Conn.WriteJSON(m)
+			c.Ws.WriteJSON(m)
 		}
 	}
 }
