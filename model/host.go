@@ -90,7 +90,7 @@ func (h *Host) Cancel(c *Client) error {
 	h.BillEscrow = 0
 
 	// CoinHopper
-	// ให้จ่ายเหรียญที่คงค้างตามยอด Escrow ออกด้านหน้า
+	// ให้จ่ายเหรียญที่คงค้างตามยอด coinHopperEscrow ออกด้านหน้า
 	m2 := &Message{
 		Device:  "coin_hopper",
 		Command: "payout_by_cash",
@@ -108,9 +108,9 @@ func (h *Host) Cancel(c *Client) error {
 		c.Msg.Data = "Coin Hopper Error"
 		c.Send <- c.Msg
 	}
-	h.TotalEscrow = 0
+	h.TotalEscrow = 0 // เคลียร์ยอดเงินค้างให้หมด
 
-	// Send message to Web Client
+	// Send message response back to Web Client
 	c.Msg.Type = "response"
 	c.Msg.Result = true
 	c.Msg.Data = "sucess"

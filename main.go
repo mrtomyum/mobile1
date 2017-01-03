@@ -24,12 +24,12 @@ func main() {
 	go model.H.Run()
 	r := gin.Default()
 	app := router(r)
-	//app.Run(":8088")
-	app.RunTLS(
-		":8088",
-		"api.nava.work.crt",
-		"nava.work.key",
-	)
+	app.Run(":8088")
+	//app.RunTLS(
+	//	":8088",
+	//	"api.nava.work.crt",
+	//	"nava.work.key",
+	//)
 }
 
 func router(r *gin.Engine) *gin.Engine {
