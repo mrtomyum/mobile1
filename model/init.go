@@ -1,11 +1,11 @@
 package model
 
 var (
-	H  Host
-	B  BillAcceptor
-	C  CoinAcceptor
-	CH CoinHopper
-	P  Printer
+	H  *Host
+	B  *BillAcceptor
+	C  *CoinAcceptor
+	CH *CoinHopper
+	P  *Printer
 )
 
 func init() {
@@ -24,13 +24,15 @@ func init() {
 		CancelOrder:   make(chan *Client),
 	}
 	B = &BillAcceptor{
-		status: "ok",
+		Status: "ok",
 	}
 	C = &CoinAcceptor{
-		status: "ok",
+		Status: "ok",
 	}
 	CH = &CoinHopper{
-		status: "ok",
+		Status: "ok",
 	}
-	P = &Printer{}
+	P = &Printer{
+		Status: "ok",
+	}
 }
