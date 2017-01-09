@@ -19,7 +19,7 @@ func init() {
 		TotalCash:     0,
 		SetWebClient:  make(chan *Client),
 		SetDevClient:  make(chan *Client),
-		CheckOnhand:   make(chan *Client),
+		GetEscrow:     make(chan *Client),
 		CancelOrder:   make(chan *Client),
 	}
 	B = BillAcceptor{

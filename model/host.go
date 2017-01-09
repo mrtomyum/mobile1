@@ -19,7 +19,7 @@ type Host struct {
 	Dev           *Client
 	SetWebClient  chan *Client
 	SetDevClient  chan *Client
-	CheckOnhand   chan *Client
+	GetEscrow     chan *Client
 	CancelOrder   chan *Client
 }
 
@@ -33,15 +33,15 @@ func (h *Host) Run() {
 		case c := <-h.SetDevClient:
 			log.Println("<-devClient:", c)
 			h.Dev = c
-		case c := <-h.CheckOnhand:
-			log.Println("<-CheckOnhand:", c)
-			h.Onhand(c)
-		case c := <-h.CancelOrder:
-			log.Println("<-CancelOrder:", c)
-			err := h.Cancel(c)
-			if err != nil {
-				log.Println("error", err)
-			}
+			//case c := <-h.GetEscrow:
+			//	log.Println("<-GetEscrow:", c)
+			//	h.Onhand(c)
+			//case c := <-h.CancelOrder:
+			//	log.Println("<-CancelOrder:", c)
+			//	err := h.Cancel(c)
+			//	if err != nil {
+			//		log.Println("error", err)
+			//	}
 		}
 	}
 }
@@ -78,10 +78,10 @@ func (h *Host) Cancel(c *Client) error {
 	}
 	h.Dev.Send <- m1
 
-	// Todo: Check BillAcc response
+	// Check BillAcc response
 	err := h.Dev.Ws.ReadJSON(&m1)
 	if err != nil {
-		log.Println("Host.Cancel() error 1")
+		log.Println("Host.Cancel() error ->", m1.Data)
 		return err
 	}
 
@@ -99,14 +99,15 @@ func (h *Host) Cancel(c *Client) error {
 	}
 	h.Dev.Send <- m2
 
-	// Todo: Check if error from CoinHopper
-	err = h.Dev.Ws.ReadJSON(&m1)
+	// Check if error from CoinHopper
+	err = h.Dev.Ws.ReadJSON(&m2)
 	if err != nil {
 		log.Println("Cancel() Coin Hopper error:", err)
 		c.Msg.Result = false
 		c.Msg.Type = "response"
-		c.Msg.Data = "Coin Hopper Error"
+		c.Msg.Data = m2.Data
 		c.Send <- c.Msg
+		return err
 	}
 	h.TotalEscrow = 0 // เคลียร์ยอดเงินค้างให้หมด
 
