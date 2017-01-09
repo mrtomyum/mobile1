@@ -9,7 +9,7 @@ type Devicer interface {
 type CoinHopperStatus int
 
 const (
-	DISABLE                 CoinHopperStatus = iota
+	DISABLE CoinHopperStatus = iota
 	CALIBRATION_FAULT
 	NO_KEY_SET
 	COIN_JAMMED
@@ -21,11 +21,8 @@ const (
 )
 
 type CoinHopper struct {
-	status string
-}
-
-func (ch *CoinHopper) Status() string {
-	return ch.status
+	Id     string
+	Status string
 }
 
 func (ch *CoinHopper) Payout(v int) error {
@@ -35,9 +32,21 @@ func (ch *CoinHopper) Payout(v int) error {
 }
 
 type BillAcceptor struct {
-	status string
+	Id     string
+	Status string
 }
 
 type CoinAcceptor struct {
-	status string
+	Id     string
+	Status string
+}
+
+type Printer struct {
+	Id     string
+	Status string
+}
+
+type MainBoard struct {
+	Id     string
+	Status string
 }

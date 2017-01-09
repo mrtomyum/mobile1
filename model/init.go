@@ -5,10 +5,11 @@ var (
 	B  BillAcceptor
 	C  CoinAcceptor
 	CH CoinHopper
+	P  Printer
 )
 
 func init() {
-	H = Host{
+	H = &Host{
 		Id:            "001",
 		Online:        true,
 		TotalEscrow:   0,
@@ -22,13 +23,14 @@ func init() {
 		GetEscrow:     make(chan *Client),
 		CancelOrder:   make(chan *Client),
 	}
-	B = BillAcceptor{
+	B = &BillAcceptor{
 		status: "ok",
 	}
-	C = CoinAcceptor{
+	C = &CoinAcceptor{
 		status: "ok",
 	}
-	CH = CoinHopper{
+	CH = &CoinHopper{
 		status: "ok",
 	}
+	P = &Printer{}
 }
